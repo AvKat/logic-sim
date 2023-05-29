@@ -13,7 +13,7 @@ export class TruthTable {
   data: TruthTableDataType;
   numInputs: number;
 
-  constructor(from: TruthTableDataType) {
+  constructor(from: TruthTableDataType, public name: string) {
     const firstEntry = Object.entries(from)[0];
     this.numInputs = firstEntry[0].length;
     this.data = from;
@@ -27,20 +27,17 @@ export class TruthTable {
 
 export class CompiledLogicGate {
   id: string;
-  truthTable: TruthTable;
   input: Pin[];
   output: Pin[];
 
-  constructor(table: TruthTableDataType, public name?: string) {
+  constructor(public truthTable: TruthTable, public name?: string) {
     this.id = v4();
-    this.truthTable = new TruthTable(table);
     this.input = Array(this.truthTable.numInputs).fill(0);
     this.output = this.truthTable.getOutput(this.input);
   }
 }
 
 export type BoardPinNumberTuple = [string, number];
-export type BoardPinNumberTupleExtended = [string | CompiledLogicGate, number];
 export type OutputsFromBoard = BoardPinNumberTuple[][];
 type FrontierType = Array<[string, number, Pin]>;
 
@@ -52,7 +49,7 @@ export class Board {
   inputs: Pin[];
   outputs: Pin[];
 
-  constructor(public base: number = 2) {
+  constructor(public name: string, public base: number = 2) {
     this.logicGates = {};
     this.connections = {};
     this.inputs = [];
@@ -61,23 +58,20 @@ export class Board {
     this.outputCount = 0;
   }
 
-  addLogicGate(gate: CompiledLogicGate) {
+  addLogicGate(table: TruthTable, name?: string) {
+    const gate = new CompiledLogicGate(table, name);
     this.logicGates[gate.id] = gate;
     this.connections[gate.id] = Array(gate.truthTable.numInputs).fill([]);
+    return gate.id;
   }
 
   getNameSafe(gateId: string) {
     return this.logicGates[gateId]?.name || gateId;
   }
 
-  addConnection(
-    from: BoardPinNumberTupleExtended,
-    to: BoardPinNumberTupleExtended
-  ) {
+  addConnection(from: BoardPinNumberTuple, to: BoardPinNumberTuple) {
     let [fromGateId, fromPin] = from;
-    if (typeof fromGateId !== "string") fromGateId = fromGateId.id;
     let [toGateId, toPin] = to;
-    if (typeof toGateId !== "string") toGateId = toGateId.id;
 
     if (!this.connections[fromGateId]) this.connections[fromGateId] = [];
     if (!this.connections[fromGateId][fromPin])
@@ -197,7 +191,7 @@ export class Board {
     return this.outputs;
   }
 
-  generateTruthTable() {
+  generateTruthTable(): TruthTable {
     const oldInputs = this.inputs;
 
     this.inputs = Array(this.inputs.length).fill(0);
@@ -213,6 +207,6 @@ export class Board {
     }
     this.inputs = oldInputs;
     this.updateOutputs(this.createDefaultFrontier());
-    return truthTableData;
+    return new TruthTable(truthTableData, this.name);
   }
 }

@@ -1,22 +1,31 @@
-import { Board, CompiledLogicGate, TruthTableDataType } from "./Board";
+import { TruthTable } from "./Board";
 
-const AndTable: TruthTableDataType = {
-  "00": [0],
-  "01": [0],
-  "10": [0],
-  "11": [1],
-};
+const AndTable = new TruthTable(
+  {
+    "00": [0],
+    "01": [0],
+    "10": [0],
+    "11": [1],
+  },
+  "AND"
+);
 
-const OrTable: TruthTableDataType = {
-  "00": [0],
-  "01": [1],
-  "10": [1],
-  "11": [1],
-};
+const OrTable = new TruthTable(
+  {
+    "00": [0],
+    "01": [1],
+    "10": [1],
+    "11": [1],
+  },
+  "OR"
+);
 
-const NotTable: TruthTableDataType = {
-  "0": [1],
-  "1": [0],
-};
+const NotTable = new TruthTable(
+  {
+    "0": [1],
+    "1": [0],
+  },
+  "NOT"
+);
 
 export { AndTable, OrTable, NotTable };
