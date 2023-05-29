@@ -1,4 +1,4 @@
-import type { TruthTableDataType } from "./Board";
+import { Board, CompiledLogicGate, TruthTableDataType } from "./Board";
 
 const AndTable: TruthTableDataType = {
   "00": [0],

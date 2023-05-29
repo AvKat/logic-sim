@@ -7,7 +7,7 @@ const dp = (...args: any[]) => {
 };
 
 export type Pin = 0 | 1;
-export type TruthTableDataType = Record<string, [Pin]>;
+export type TruthTableDataType = Record<string, Pin[]>;
 
 export class TruthTable {
   data: TruthTableDataType;
@@ -52,7 +52,7 @@ export class Board {
   inputs: Pin[];
   outputs: Pin[];
 
-  constructor() {
+  constructor(public base: number = 2) {
     this.logicGates = {};
     this.connections = {};
     this.inputs = [];
@@ -189,11 +189,30 @@ export class Board {
 
       const [gateId, pinNumber, nextValue] = frontier.shift()!;
       // dp("Handling gate:", gateId, pinNumber);
-      const gate = this.logicGates[gateId];
+      // const gate = this.logicGates[gateId];
       // dp("bbbbb", gate.name || "random-b", pinNumber, nextValue);
       updateSingleGate(gateId, pinNumber, nextValue);
     }
 
     return this.outputs;
+  }
+
+  generateTruthTable() {
+    const oldInputs = this.inputs;
+
+    this.inputs = Array(this.inputs.length).fill(0);
+    const truthTableData: TruthTableDataType = {};
+    let i = 0;
+    while (i < Math.pow(this.base, this.inputs.length)) {
+      const binary = i.toString(this.base).padStart(this.inputs.length, "0");
+      const inputs = binary.split("").map((x) => parseInt(x) as Pin);
+      this.inputs = inputs;
+      const outputs = this.updateOutputs(this.createDefaultFrontier());
+      truthTableData[binary] = [...outputs];
+      i++;
+    }
+    this.inputs = oldInputs;
+    this.updateOutputs(this.createDefaultFrontier());
+    return truthTableData;
   }
 }
