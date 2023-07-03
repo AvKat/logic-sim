@@ -1,10 +1,5 @@
 import { v4 } from "uuid";
-
-const debug = false;
-
-const dp = (...args: any[]) => {
-  if (debug) console.log(...args);
-};
+import { DoublyLinkedList } from "./DoubleLinkedList";
 
 export type Pin = 0 | 1;
 export type TruthTableDataType = Record<string, Pin[]>;
@@ -35,11 +30,18 @@ export class CompiledLogicGate {
     this.input = Array(this.truthTable.numInputs).fill(0);
     this.output = this.truthTable.getOutput(this.input);
   }
+
+  setInput(index: number, value: Pin) {
+    this.input[index] = value;
+    this.output = this.truthTable.getOutput(this.input);
+    return this.output;
+  }
 }
 
 export type BoardPinNumberTuple = [string, number];
 export type OutputsFromBoard = BoardPinNumberTuple[][];
-type FrontierType = Array<[string, number, Pin]>;
+type FrontierItem = [string, number, Pin];
+type FrontierType = DoublyLinkedList<FrontierItem>;
 
 export class Board {
   logicGates: Record<string, CompiledLogicGate>;
@@ -61,7 +63,10 @@ export class Board {
   addLogicGate(table: TruthTable, name?: string) {
     const gate = new CompiledLogicGate(table, name);
     this.logicGates[gate.id] = gate;
-    this.connections[gate.id] = Array(gate.truthTable.numInputs).fill([]);
+    this.connections[gate.id] = [];
+    for (let i = 0; i < table.numInputs; i++) {
+      this.connections[gate.id].push([]);
+    }
     return gate.id;
   }
 
@@ -88,17 +93,7 @@ export class Board {
       this.logicGates[toGateId].input[toPin] = fromOutput;
     }
 
-    this.updateOutputs([[toGateId, toPin, fromOutput]]);
-    dp(
-      "Added connection from",
-      this.getNameSafe(fromGateId),
-      fromPin,
-      "to",
-      this.getNameSafe(toGateId),
-      toPin,
-      "with value",
-      fromOutput
-    );
+    this.updateOutputs(new DoublyLinkedList([[toGateId, toPin, fromOutput]]));
   }
 
   addInput() {
@@ -124,13 +119,16 @@ export class Board {
     const firstLayerOfConnections = this.connections[inputId][0];
     const nextValue = this.inputs[starterIndex];
 
-    return firstLayerOfConnections.map(([gateId, pinNumber]) => {
-      return [gateId, pinNumber, nextValue];
-    });
+    const formatted: FrontierItem[] = firstLayerOfConnections.map(
+      ([gateId, pinNumber]) => {
+        return [gateId, pinNumber, nextValue];
+      }
+    );
+    return new DoublyLinkedList(formatted);
   }
 
   createDefaultFrontier(): FrontierType {
-    const frontier: FrontierType = [];
+    const frontier_arr: FrontierItem[] = [];
     for (let i = 0; i < this.inputs.length; i++) {
       const inputId = `input-${i}`;
       if (!this.connections[inputId]) continue;
@@ -138,56 +136,37 @@ export class Board {
       const nextValue = this.inputs[i];
       for (let j = 0; j < firstLayerOfConnections.length; j++) {
         const [gateId, pinNumber] = firstLayerOfConnections[j];
-        frontier.push([gateId, pinNumber, nextValue]);
+        frontier_arr.push([gateId, pinNumber, nextValue]);
       }
     }
-    return frontier;
+    return new DoublyLinkedList(frontier_arr);
   }
 
-  updateOutputs(frontier: FrontierType) {
+  updateOutputs(frontier: FrontierType): Pin[] {
     let i = 0;
-    const updateSingleGate = (
-      gateId: string,
-      pinNumber: number,
-      value: Pin
-    ) => {
-      dp("aaa", this.logicGates[gateId]?.name || gateId, pinNumber, value);
+    while (frontier.length > 0) {
+      if (i++ == 1000) {
+        console.error("stopping because of maximum recursion");
+        break;
+      }
+      const [gateId, pinNumber, value] = frontier.popFirst()!;
       if (gateId.startsWith("output-")) {
-        // dp(gateId, pinNumber, value);
-        this.outputs[parseInt(gateId.split("-")[1])] = value;
-        return;
+        const gateNumber = parseInt(gateId.split("-")[1]);
+        this.outputs[gateNumber] = value;
+        continue;
       }
       const gate = this.logicGates[gateId];
       const oldOutput = gate.output;
-      gate.input[pinNumber] = value;
-      gate.output = gate.truthTable.getOutput(gate.input);
-      dp(gate.input, oldOutput, gate.output);
-      for (let i = 0; i < gate.output.length; i++) {
-        if (gate.output[i] !== oldOutput[i]) {
+      const newOutput = gate.setInput(pinNumber, value);
+      for (let i = 0; i < oldOutput.length; i++) {
+        if (oldOutput[i] !== newOutput[i]) {
           const nextGates = this.connections[gateId][i];
-          for (const nextGate of nextGates) {
-            const [nextGateId, nextPinNumber] = nextGate;
-            frontier.push([nextGateId, nextPinNumber, gate.output[i]]);
-          }
+          nextGates.forEach(([ngate, nindex]) => {
+            frontier.append([ngate, nindex, newOutput[i]]);
+          });
         }
       }
-    };
-
-    while (frontier.length > 0 && i++ < 100) {
-      dp("Frontier start");
-      for (let i = 0; i < frontier.length; i++) {
-        const id = frontier[i][0];
-        dp(this.logicGates[id]?.name || id, frontier[i][1], frontier[i][2]);
-      }
-      dp("Frontier unstart");
-
-      const [gateId, pinNumber, nextValue] = frontier.shift()!;
-      // dp("Handling gate:", gateId, pinNumber);
-      // const gate = this.logicGates[gateId];
-      // dp("bbbbb", gate.name || "random-b", pinNumber, nextValue);
-      updateSingleGate(gateId, pinNumber, nextValue);
     }
-
     return this.outputs;
   }
 
@@ -202,6 +181,9 @@ export class Board {
       const inputs = binary.split("").map((x) => parseInt(x) as Pin);
       this.inputs = inputs;
       const outputs = this.updateOutputs(this.createDefaultFrontier());
+      if (this.name.startsWith("Full")) {
+        console.log("saving", binary, "as", outputs);
+      }
       truthTableData[binary] = [...outputs];
       i++;
     }

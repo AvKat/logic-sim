@@ -20,8 +20,8 @@ const createXORBoard = () => {
   board.addConnection([b, 0], [a1, 1]);
 
   board.addConnection([a1, 0], [n1, 0]);
-  board.addConnection([n1, 0], [a2, 0]);
-  board.addConnection([o1, 0], [a2, 1]);
+  board.addConnection([o1, 0], [a2, 0]);
+  board.addConnection([n1, 0], [a2, 1]);
   board.addConnection([a2, 0], [o, 0]);
   return board;
 };
@@ -146,6 +146,116 @@ describe("MUX testing", () => {
       "101": [0],
       "110": [1],
       "111": [1],
+    });
+  });
+});
+
+const createHalfAdderBoard = () => {
+  const board = new Board("Half Adder");
+  const a = board.addInput();
+  const b = board.addInput();
+  const cout = board.addOutput();
+  const sum = board.addOutput();
+
+  const x1 = board.addLogicGate(XORTable, "x1");
+  const a1 = board.addLogicGate(AndTable, "a1");
+
+  board.addConnection([a, 0], [x1, 0]);
+  board.addConnection([b, 0], [x1, 1]);
+  board.addConnection([x1, 0], [sum, 0]);
+
+  board.addConnection([a, 0], [a1, 0]);
+  board.addConnection([b, 0], [a1, 1]);
+  board.addConnection([a1, 0], [cout, 0]);
+
+  return board;
+};
+
+const HalfAdderTable = createHalfAdderBoard().generateTruthTable();
+
+describe("Half Adder testing", () => {
+  test("Half Adder board", () => {
+    const board = createHalfAdderBoard();
+
+    expect(board.outputs).toEqual([0, 0]);
+    board.setInput(0, 1);
+    expect(board.outputs).toEqual([0, 1]);
+    board.setInput(1, 1);
+    expect(board.outputs).toEqual([1, 0]);
+    board.setInput(0, 0);
+    expect(board.outputs).toEqual([0, 1]);
+    board.setInput(1, 0);
+    expect(board.outputs).toEqual([0, 0]);
+  });
+
+  test("Half Adder table", () => {
+    expect(HalfAdderTable.data).toEqual({
+      "00": [0, 0],
+      "01": [0, 1],
+      "10": [0, 1],
+      "11": [1, 0],
+    });
+  });
+});
+
+const createFullAdderBoard = () => {
+  const board = new Board("Full Adder");
+  const a = board.addInput();
+  const b = board.addInput();
+  const cin = board.addInput();
+  const cout = board.addOutput();
+  const sum = board.addOutput();
+
+  const ha1 = board.addLogicGate(HalfAdderTable, "ha1");
+  const ha2 = board.addLogicGate(HalfAdderTable, "ha2");
+  const o1 = board.addLogicGate(OrTable, "o1");
+
+  board.addConnection([a, 0], [ha1, 0]);
+  board.addConnection([b, 0], [ha1, 1]);
+
+  board.addConnection([ha1, 1], [ha2, 0]);
+  board.addConnection([cin, 0], [ha2, 1]);
+
+  board.addConnection([ha1, 0], [o1, 0]);
+  board.addConnection([ha2, 0], [o1, 1]);
+
+  board.addConnection([ha2, 1], [sum, 0]);
+  board.addConnection([o1, 0], [cout, 0]);
+
+  return board;
+};
+
+const FullAdderTable = createFullAdderBoard().generateTruthTable();
+
+describe("Full Adder testing", () => {
+  test("Full Adder board", () => {
+    const board = createFullAdderBoard();
+    console.log("----------------------------------");
+
+    expect(board.outputs).toEqual([0, 0]);
+    board.setInput(0, 1);
+    expect(board.outputs).toEqual([0, 1]);
+    board.setInput(1, 1);
+    expect(board.outputs).toEqual([1, 0]);
+    board.setInput(2, 1);
+    expect(board.outputs).toEqual([1, 1]);
+    board.setInput(0, 0);
+    board.setInput(2, 0);
+    expect(board.outputs).toEqual([0, 1]);
+  });
+
+  // console.log("full adder:", FullAdderTable.data);
+
+  test("Full Adder table", () => {
+    expect(FullAdderTable.data).toEqual({
+      "000": [0, 0],
+      "001": [0, 1],
+      "010": [0, 1],
+      "011": [1, 0],
+      "100": [0, 1],
+      "101": [1, 0],
+      "110": [1, 0],
+      "111": [1, 1],
     });
   });
 });
