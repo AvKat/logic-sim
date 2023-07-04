@@ -1,5 +1,5 @@
-import { Board } from "./Board";
-import { AndTable, OrTable, NotTable } from "./Builtins";
+import { Board } from "../Board";
+import { AndTable, OrTable, NotTable } from "../Builtins";
 
 // We create boards like this so that tesing can be done in one place
 const createXORBoard = () => {

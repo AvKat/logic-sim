@@ -1,7 +1,7 @@
 import { v4 } from "uuid";
 import { DoublyLinkedList } from "./DoubleLinkedList";
 
-export type Pin = 0 | 1;
+export type Pin = number;
 export type TruthTableDataType = Record<string, Pin[]>;
 
 export class TruthTable {
