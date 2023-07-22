@@ -1,4 +1,4 @@
-import { TruthTable } from "./Board";
+import { TruthTable } from "../Board";
 
 const AndTable = new TruthTable(
   {

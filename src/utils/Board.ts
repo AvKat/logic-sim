@@ -22,11 +22,13 @@ export class TruthTable {
 
 export class CompiledLogicGate {
   id: string;
+  name: string;
   input: Pin[];
   output: Pin[];
 
-  constructor(public truthTable: TruthTable, public name?: string) {
+  constructor(public truthTable: TruthTable, name?: string) {
     this.id = v4();
+    this.name = name || truthTable.name;
     this.input = Array(this.truthTable.numInputs).fill(0);
     this.output = this.truthTable.getOutput(this.input);
   }
@@ -68,10 +70,6 @@ export class Board {
       this.connections[gate.id].push([]);
     }
     return gate.id;
-  }
-
-  getNameSafe(gateId: string) {
-    return this.logicGates[gateId]?.name || gateId;
   }
 
   addConnection(from: BoardPinNumberTuple, to: BoardPinNumberTuple) {
