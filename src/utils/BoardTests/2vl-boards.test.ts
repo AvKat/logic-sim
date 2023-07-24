@@ -1,36 +1,33 @@
 import { Board } from "../Board";
 import { AndTable, NotTable, OrTable } from "../BoardBuiltins/2vl-builtins";
 
-// We create boards like this so that tesing can be done in one place
-const createXORBoard = () => {
-  const board = new Board("XOR");
-  const a = board.addInput();
-  const b = board.addInput();
-  const o = board.addOutput();
+const XORBoard = new Board({
+  name: "XOR",
+  inputCount: 2,
+  outputCount: 1,
+  logicGates: [
+    [AndTable, "a1"],
+    [AndTable, "a2"],
+    [OrTable, "o1"],
+    [NotTable, "n1"],
+  ],
+  connections: [
+    ["input", 0, "a1", 0],
+    ["input", 1, "a1", 1],
+    ["a1", 0, "n1", 0],
+    ["n1", 0, "a2", 0],
+    ["input", 0, "o1", 0],
+    ["input", 1, "o1", 1],
+    ["o1", 0, "a2", 1],
+    ["a2", 0, "output", 0],
+  ],
+});
 
-  const a1 = board.addLogicGate(AndTable, "a1");
-  const a2 = board.addLogicGate(AndTable, "a2");
-  const o1 = board.addLogicGate(OrTable, "o1");
-  const n1 = board.addLogicGate(NotTable, "n1");
-
-  board.addConnection([a, 0], [o1, 0]);
-  board.addConnection([b, 0], [o1, 1]);
-
-  board.addConnection([a, 0], [a1, 0]);
-  board.addConnection([b, 0], [a1, 1]);
-
-  board.addConnection([a1, 0], [n1, 0]);
-  board.addConnection([o1, 0], [a2, 0]);
-  board.addConnection([n1, 0], [a2, 1]);
-  board.addConnection([a2, 0], [o, 0]);
-  return board;
-};
-
-const XORTable = createXORBoard().generateTruthTable();
+const XORTable = XORBoard.generateTruthTable();
 
 describe("XOR testing", () => {
   test("XOR board", () => {
-    const board = createXORBoard();
+    const board = XORBoard;
 
     expect(board.outputs).toEqual([0]);
     board.setInput(0, 1);
@@ -49,28 +46,27 @@ describe("XOR testing", () => {
   });
 });
 
-const createNandBoard = () => {
-  const board = new Board("NAND");
-  const a = board.addInput();
-  const b = board.addInput();
-  const o = board.addOutput();
+const NandBoard = new Board({
+  name: "NAND",
+  inputCount: 2,
+  outputCount: 1,
+  logicGates: [
+    [AndTable, "a1"],
+    [NotTable, "n1"],
+  ],
+  connections: [
+    ["input", 0, "a1", 0],
+    ["input", 1, "a1", 1],
+    ["a1", 0, "n1", 0],
+    ["n1", 0, "output", 0],
+  ],
+});
 
-  const a1 = board.addLogicGate(AndTable, "a1");
-  const n1 = board.addLogicGate(NotTable, "n1");
-
-  board.addConnection([a, 0], [a1, 0]);
-  board.addConnection([b, 0], [a1, 1]);
-
-  board.addConnection([a1, 0], [n1, 0]);
-  board.addConnection([n1, 0], [o, 0]);
-  return board;
-};
-
-const NandTable = createNandBoard().generateTruthTable();
+const NandTable = NandBoard.generateTruthTable();
 
 describe("NAND testing", () => {
   test("NAND board", () => {
-    const board = createNandBoard();
+    const board = NandBoard;
 
     expect(board.outputs).toEqual([1]);
     board.setInput(0, 1);
@@ -89,37 +85,33 @@ describe("NAND testing", () => {
   });
 });
 
-const createMuxBoard = () => {
-  const board = new Board("MUX");
-  const a = board.addInput();
-  const b = board.addInput();
-  const s = board.addInput();
-  const o = board.addOutput();
+const MuxBoard = new Board({
+  name: "MUX",
+  inputCount: 3,
+  outputCount: 1,
+  logicGates: [
+    [AndTable, "a1"],
+    [AndTable, "a2"],
+    [OrTable, "o1"],
+    [NotTable, "n1"],
+  ],
+  connections: [
+    ["input", 2, "n1", 0],
+    ["input", 0, "a1", 0],
+    ["n1", 0, "a1", 1],
+    ["input", 1, "a2", 0],
+    ["input", 2, "a2", 1],
+    ["a1", 0, "o1", 0],
+    ["a2", 0, "o1", 1],
+    ["o1", 0, "output", 0],
+  ],
+});
 
-  const a1 = board.addLogicGate(AndTable, "a1");
-  const a2 = board.addLogicGate(AndTable, "a2");
-  const o1 = board.addLogicGate(OrTable, "o1");
-  const n1 = board.addLogicGate(NotTable, "n1");
-
-  board.addConnection([s, 0], [n1, 0]);
-  board.addConnection([a, 0], [a1, 0]);
-  board.addConnection([n1, 0], [a1, 1]);
-
-  board.addConnection([b, 0], [a2, 0]);
-  board.addConnection([s, 0], [a2, 1]);
-
-  board.addConnection([a1, 0], [o1, 0]);
-  board.addConnection([a2, 0], [o1, 1]);
-
-  board.addConnection([o1, 0], [o, 0]);
-  return board;
-};
-
-const MuxTable = createMuxBoard().generateTruthTable();
+const MuxTable = MuxBoard.generateTruthTable();
 
 describe("MUX testing", () => {
   test("MUX board", () => {
-    const board = createMuxBoard();
+    const board = MuxBoard;
 
     expect(board.outputs).toEqual([0]);
     board.setInput(0, 1);
@@ -150,32 +142,29 @@ describe("MUX testing", () => {
   });
 });
 
-const createHalfAdderBoard = () => {
-  const board = new Board("Half Adder");
-  const a = board.addInput();
-  const b = board.addInput();
-  const cout = board.addOutput();
-  const sum = board.addOutput();
+const HalfAdderBoard = new Board({
+  name: "Half Adder",
+  inputCount: 2,
+  outputCount: 2,
+  logicGates: [
+    [XORTable, "xor"],
+    [AndTable, "and"],
+  ],
+  connections: [
+    ["input", 0, "xor", 0],
+    ["input", 1, "xor", 1],
+    ["input", 0, "and", 0],
+    ["input", 1, "and", 1],
+    ["and", 0, "output", 0],
+    ["xor", 0, "output", 1],
+  ],
+});
 
-  const x1 = board.addLogicGate(XORTable, "x1");
-  const a1 = board.addLogicGate(AndTable, "a1");
-
-  board.addConnection([a, 0], [x1, 0]);
-  board.addConnection([b, 0], [x1, 1]);
-  board.addConnection([x1, 0], [sum, 0]);
-
-  board.addConnection([a, 0], [a1, 0]);
-  board.addConnection([b, 0], [a1, 1]);
-  board.addConnection([a1, 0], [cout, 0]);
-
-  return board;
-};
-
-const HalfAdderTable = createHalfAdderBoard().generateTruthTable();
+const HalfAdderTable = HalfAdderBoard.generateTruthTable();
 
 describe("Half Adder testing", () => {
   test("Half Adder board", () => {
-    const board = createHalfAdderBoard();
+    const board = HalfAdderBoard;
 
     expect(board.outputs).toEqual([0, 0]);
     board.setInput(0, 1);
@@ -198,39 +187,32 @@ describe("Half Adder testing", () => {
   });
 });
 
-const createFullAdderBoard = () => {
-  const board = new Board("Full Adder");
-  const a = board.addInput();
-  const b = board.addInput();
-  const cin = board.addInput();
-  const cout = board.addOutput();
-  const sum = board.addOutput();
+const FullAdderBoard = new Board({
+  name: "Full Adder",
+  inputCount: 3,
+  outputCount: 2,
+  logicGates: [
+    [HalfAdderTable, "ha1"],
+    [HalfAdderTable, "ha2"],
+    [OrTable, "o1"],
+  ],
+  connections: [
+    ["input", 0, "ha1", 0],
+    ["input", 1, "ha1", 1],
+    ["ha1", 1, "ha2", 0],
+    ["input", 2, "ha2", 1],
+    ["ha1", 0, "o1", 0],
+    ["ha2", 0, "o1", 1],
+    ["o1", 0, "output", 0],
+    ["ha2", 1, "output", 1],
+  ],
+});
 
-  const ha1 = board.addLogicGate(HalfAdderTable, "ha1");
-  const ha2 = board.addLogicGate(HalfAdderTable, "ha2");
-  const o1 = board.addLogicGate(OrTable, "o1");
-
-  board.addConnection([a, 0], [ha1, 0]);
-  board.addConnection([b, 0], [ha1, 1]);
-
-  board.addConnection([ha1, 1], [ha2, 0]);
-  board.addConnection([cin, 0], [ha2, 1]);
-
-  board.addConnection([ha1, 0], [o1, 0]);
-  board.addConnection([ha2, 0], [o1, 1]);
-
-  board.addConnection([ha2, 1], [sum, 0]);
-  board.addConnection([o1, 0], [cout, 0]);
-
-  return board;
-};
-
-const FullAdderTable = createFullAdderBoard().generateTruthTable();
+const FullAdderTable = FullAdderBoard.generateTruthTable();
 
 describe("Full Adder testing", () => {
   test("Full Adder board", () => {
-    const board = createFullAdderBoard();
-    console.log("----------------------------------");
+    const board = FullAdderBoard;
 
     expect(board.outputs).toEqual([0, 0]);
     board.setInput(0, 1);
@@ -243,8 +225,6 @@ describe("Full Adder testing", () => {
     board.setInput(2, 0);
     expect(board.outputs).toEqual([0, 1]);
   });
-
-  // console.log("full adder:", FullAdderTable.data);
 
   test("Full Adder table", () => {
     expect(FullAdderTable.data).toEqual({

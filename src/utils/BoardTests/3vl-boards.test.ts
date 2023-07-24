@@ -7,19 +7,22 @@ import {
 
 describe("KleeneNAND testing", () => {
   test("KleeneNAND table", () => {
-    const board = new Board("KleeneNAND", 3);
-    const a = board.addInput();
-    const b = board.addInput();
-    const o = board.addOutput();
-
-    const a1 = board.addLogicGate(KleeneAnd, "a1");
-    const n1 = board.addLogicGate(KleeneNot, "n1");
-
-    board.addConnection([a, 0], [a1, 0]);
-    board.addConnection([b, 0], [a1, 1]);
-
-    board.addConnection([a1, 0], [n1, 0]);
-    board.addConnection([n1, 0], [o, 0]);
+    const board = new Board({
+      name: "KleeneNAND",
+      base: 3,
+      inputCount: 2,
+      outputCount: 1,
+      logicGates: [
+        [KleeneAnd, "a1"],
+        [KleeneNot, "n1"],
+      ],
+      connections: [
+        ["input", 0, "a1", 0],
+        ["input", 1, "a1", 1],
+        ["a1", 0, "n1", 0],
+        ["n1", 0, "output", 0],
+      ],
+    });
     expect(board.generateTruthTable().data).toEqual({
       "00": [2],
       "01": [2],
@@ -34,28 +37,26 @@ describe("KleeneNAND testing", () => {
   });
 });
 
-const createKleeneImplicationBoard = () => {
-  const board = new Board("KleeneImplication", 3);
-
-  const a = board.addInput();
-  const b = board.addInput();
-  const o = board.addOutput();
-
-  const o1 = board.addLogicGate(KleeneOr, "a1");
-  const n1 = board.addLogicGate(KleeneNot, "n1");
-
-  board.addConnection([a, 0], [n1, 0]);
-  board.addConnection([n1, 0], [o1, 0]);
-  board.addConnection([b, 0], [o1, 1]);
-  board.addConnection([o1, 0], [o, 0]);
-
-  return board;
-};
+const KleeneImplicationBoard = new Board({
+  name: "KleeneImplication",
+  base: 3,
+  inputCount: 2,
+  outputCount: 1,
+  logicGates: [
+    [KleeneOr, "o1"],
+    [KleeneNot, "n1"],
+  ],
+  connections: [
+    ["input", 0, "n1", 0],
+    ["n1", 0, "o1", 0],
+    ["input", 1, "o1", 1],
+    ["o1", 0, "output", 0],
+  ],
+});
 
 describe("KleeneImplication testing", () => {
   test("KleeneImplication table", () => {
-    const board = createKleeneImplicationBoard();
-    expect(board.generateTruthTable().data).toEqual({
+    expect(KleeneImplicationBoard.generateTruthTable().data).toEqual({
       "00": [2],
       "01": [2],
       "02": [2],
@@ -69,35 +70,31 @@ describe("KleeneImplication testing", () => {
   });
 });
 
-const KleeneImplication = createKleeneImplicationBoard().generateTruthTable();
-
-const createKleeneEquivalenceBoard = () => {
-  const board = new Board("KleeneEquivalence", 3);
-
-  const a = board.addInput();
-  const b = board.addInput();
-  const o = board.addOutput();
-
-  const a1 = board.addLogicGate(KleeneAnd, "a1");
-  const i1 = board.addLogicGate(KleeneImplication, "i1");
-  const i2 = board.addLogicGate(KleeneImplication, "i2");
-
-  board.addConnection([a, 0], [i1, 0]);
-  board.addConnection([b, 0], [i1, 1]);
-
-  board.addConnection([b, 0], [i2, 0]);
-  board.addConnection([a, 0], [i2, 1]);
-
-  board.addConnection([i1, 0], [a1, 0]);
-  board.addConnection([i2, 0], [a1, 1]);
-  board.addConnection([a1, 0], [o, 0]);
-
-  return board;
-};
+const KleeneImplication = KleeneImplicationBoard.generateTruthTable();
 
 describe("KleeneEquivalence testing", () => {
   test("KleeneEquivalence table", () => {
-    const board = createKleeneEquivalenceBoard();
+    const board = new Board({
+      name: "KleeneEquivalence",
+      base: 3,
+      inputCount: 2,
+      outputCount: 1,
+      logicGates: [
+        [KleeneImplication, "i1"],
+        [KleeneImplication, "i2"],
+        [KleeneAnd, "a1"],
+      ],
+      connections: [
+        ["input", 0, "i1", 0],
+        ["input", 1, "i1", 1],
+        ["input", 0, "i2", 1],
+        ["input", 1, "i2", 0],
+        ["i1", 0, "a1", 0],
+        ["i2", 0, "a1", 1],
+        ["a1", 0, "output", 0],
+      ],
+    });
+
     expect(board.generateTruthTable().data).toEqual({
       "00": [2],
       "01": [1],
