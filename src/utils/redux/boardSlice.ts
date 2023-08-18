@@ -33,38 +33,48 @@ export const boardSlice = createSlice({
       state.connections = [];
     },
     addLogicGate: (state, action: PayloadAction<[TruthTable, string]>) => {
-      state.logicGates.push(action.payload);
+      return { ...state, logicGates: [...state.logicGates, action.payload] };
     },
     deleteLogicGate: (state, action: PayloadAction<number>) => {
       const gateName = state.logicGates[action.payload][1];
-      state.connections = state.connections.filter(
+      const connections = state.connections.filter(
         (connection) => connection[0] !== gateName && connection[2] !== gateName
       );
-      state.logicGates.splice(action.payload, 1);
+      const logicGates = state.logicGates.filter(
+        (_, index) => index !== action.payload
+      );
+
+      return {
+        ...state,
+        connections,
+        logicGates,
+      };
     },
     addConnection: (
       state,
       action: PayloadAction<BoardState["connections"][0]>
     ) => {
-      state.connections.push(action.payload);
+      return { ...state, connections: [...state.connections, action.payload] };
     },
     deleteConnection: (state, action: PayloadAction<number>) => {
-      state.connections.splice(action.payload, 1);
+      return {
+        ...state,
+        connections: state.connections.filter(
+          (_, index) => index !== action.payload
+        ),
+      };
     },
     setInputCount: (state, action: PayloadAction<number>) => {
-      state.inputCount = action.payload;
+      return { ...state, inputCount: action.payload };
     },
     setOutputCount: (state, action: PayloadAction<number>) => {
-      state.outputCount = action.payload;
+      return { ...state, outputCount: action.payload };
     },
-    clearData: (state) => {
-      state.inputCount = 0;
-      state.outputCount = 0;
-      state.logicGates = [];
-      state.connections = [];
+    clearData: () => {
+      return { ...initialState };
     },
     setName: (state, action: PayloadAction<string>) => {
-      state.name = action.payload;
+      return { ...state, name: action.payload };
     },
   },
 });

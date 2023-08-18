@@ -25,21 +25,30 @@ export const mainSlice = createSlice({
   initialState,
   reducers: {
     setCurrentProject: (state, action: PayloadAction<Project>) => {
-      state.currentProject = action.payload;
+      return { ...state, currentProject: action.payload };
     },
     newProject: (state, action: PayloadAction<Project>) => {
-      state.availableProjects.push(action.payload);
-      state.currentProject = action.payload;
+      return {
+        ...state,
+        availableProjects: [...state.availableProjects, action.payload],
+        currentProject: action.payload,
+      };
     },
     clearData: (state) => {
-      state.currentProject = undefined;
-      state.availableProjects = [];
+      return {
+        ...state,
+        currentProject: undefined,
+        availableProjects: [],
+      };
     },
     closeProject: (state) => {
-      state.currentProject = undefined;
+      return {
+        ...state,
+        currentProject: undefined,
+      };
     },
     setBoardOpen: (state, action: PayloadAction<boolean>) => {
-      state.boardOpen = action.payload;
+      return { ...state, boardOpen: action.payload };
     },
   },
 });
