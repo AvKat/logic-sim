@@ -21,15 +21,12 @@ const App = () => {
       <MenuBar />
       <Divider type="horizontal" />
       <div
+        className="w-screen bg-[#353535] flex m-0"
         style={{
           height: `calc(100vh - ${MenuBarHeight + 2}px)`,
-          width: "100vw",
-          backgroundColor: "#353535",
-          margin: 0,
           position: "absolute",
           top: `${MenuBarHeight + 2}px`,
           left: 0,
-          display: "flex",
         }}
       >
         <WorkArea />

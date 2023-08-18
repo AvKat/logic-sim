@@ -1,6 +1,6 @@
-import { TruthTable } from "../Board";
+import { createTruthTable } from "../Board";
 
-const AndTable = new TruthTable(
+const AndTable = createTruthTable(
   {
     "00": [0],
     "01": [0],
@@ -10,7 +10,7 @@ const AndTable = new TruthTable(
   "AND"
 );
 
-const OrTable = new TruthTable(
+const OrTable = createTruthTable(
   {
     "00": [0],
     "01": [1],
@@ -20,7 +20,7 @@ const OrTable = new TruthTable(
   "OR"
 );
 
-const NotTable = new TruthTable(
+const NotTable = createTruthTable(
   {
     "0": [1],
     "1": [0],

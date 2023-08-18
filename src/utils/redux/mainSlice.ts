@@ -5,6 +5,7 @@ import { AndTable, NotTable, OrTable } from "../BoardBuiltins/2vl-builtins";
 type MainState = {
   currentProject?: Project;
   availableProjects: Project[];
+  boardOpen: boolean;
 };
 
 const defaultTestProject: Project = {
@@ -16,6 +17,7 @@ const defaultTestProject: Project = {
 const initialState: MainState = {
   availableProjects: [defaultTestProject],
   currentProject: defaultTestProject,
+  boardOpen: false,
 };
 
 export const mainSlice = createSlice({
@@ -33,6 +35,12 @@ export const mainSlice = createSlice({
     clearData: (state) => {
       state.currentProject = undefined;
       state.availableProjects = [];
+    },
+    closeProject: (state) => {
+      state.currentProject = undefined;
+    },
+    setBoardOpen: (state, action: PayloadAction<boolean>) => {
+      state.boardOpen = action.payload;
     },
   },
 });

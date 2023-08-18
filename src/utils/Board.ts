@@ -2,22 +2,22 @@ import { DoublyLinkedList } from "./DoubleLinkedList";
 
 export type Pin = number;
 export type TruthTableDataType = Record<string, Pin[]>;
-
-export class TruthTable {
+export type TruthTable = {
+  name: string;
   data: TruthTableDataType;
   numInputs: number;
+  numOutputs: number;
+};
 
-  constructor(from: TruthTableDataType, public name: string) {
-    const firstEntry = Object.entries(from)[0];
-    this.numInputs = firstEntry[0].length;
-    this.data = from;
-  }
-
-  getOutput(input: Pin[]): Pin[] {
-    const inputString = input.join("");
-    return this.data[inputString];
-  }
-}
+export const createTruthTable = (
+  data: TruthTableDataType,
+  name: string
+): TruthTable => {
+  const firstEntry = Object.entries(data)[0];
+  const numInputs = firstEntry[0].length;
+  const numOutputs = firstEntry[1].length;
+  return { data, name, numInputs, numOutputs };
+};
 
 export class CompiledLogicGate {
   name: string;
@@ -27,12 +27,18 @@ export class CompiledLogicGate {
   constructor(public truthTable: TruthTable, name?: string) {
     this.name = name || truthTable.name;
     this.input = Array(this.truthTable.numInputs).fill(0);
-    this.output = this.truthTable.getOutput(this.input);
+    this.output = this.getOutput(this.input);
+  }
+
+  getOutput(input: Pin[]) {
+    const key = input.join("");
+    this.output = this.truthTable.data[key];
+    return this.output;
   }
 
   setInput(index: number, value: Pin) {
     this.input[index] = value;
-    this.output = this.truthTable.getOutput(this.input);
+    this.output = this.getOutput(this.input);
     return this.output;
   }
 }
@@ -42,7 +48,7 @@ export type OutputsFromBoard = BoardPinNumberTuple[][];
 type FrontierItem = [string, number, Pin];
 type FrontierType = DoublyLinkedList<FrontierItem>;
 
-type BoardInitType = {
+export type BoardInitType = {
   name: string;
   base?: number;
   inputCount: number;
@@ -194,6 +200,6 @@ export class Board {
     }
     this.inputs = oldInputs;
     this.updateOutputs(this.createDefaultFrontier());
-    return new TruthTable(truthTableData, this.name);
+    return createTruthTable(truthTableData, this.name);
   }
 }
