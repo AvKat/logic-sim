@@ -5,25 +5,27 @@ interface HeadingWithPlusMinusProps {
   title: string;
   onPlusClick: () => void;
   onMinusClick: () => void;
+  plusDisabled?: boolean;
+  minusDisabled?: boolean;
 }
 export const HeadingWithPM: React.FC<HeadingWithPlusMinusProps> = ({
   title,
   onPlusClick,
   onMinusClick,
+  plusDisabled = false,
+  minusDisabled = false,
 }) => {
   return (
     <>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          padding: "0 10px",
-        }}
-      >
+      <div className="flex justify-between px-2">
         <span>{title}</span>
         <div>
-          <button onClick={onMinusClick}>-</button>
-          <button onClick={onPlusClick}>+</button>
+          <button onClick={onMinusClick} disabled={minusDisabled}>
+            -
+          </button>
+          <button onClick={onPlusClick} disabled={plusDisabled}>
+            +
+          </button>
         </div>
       </div>
       <Divider type="horizontal" />

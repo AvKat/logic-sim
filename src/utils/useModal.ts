@@ -1,17 +1,17 @@
 import React from "react";
 
-type InitFunction = (options: {
+export type UseModalArgs = {
   isOpen: boolean;
   handleClose: () => void;
-}) => JSX.Element;
+};
 
-type useDialogType = (dialog: InitFunction) => {
+type useModalType = (dialog: (options: UseModalArgs) => JSX.Element) => {
   isOpen: boolean;
   setOpen: (open: boolean) => void;
   dialog: React.ReactNode;
 };
 
-export const useDialog: useDialogType = (dialog) => {
+export const useModal: useModalType = (dialog) => {
   const [isOpen, setOpen] = React.useState(false);
 
   const handleClose = () => setOpen(false);

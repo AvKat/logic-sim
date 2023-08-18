@@ -30,7 +30,6 @@ export const mainSlice = createSlice({
     newProject: (state, action: PayloadAction<Project>) => {
       state.availableProjects.push(action.payload);
       state.currentProject = action.payload;
-      console.log(state.currentProject);
     },
     clearData: (state) => {
       state.currentProject = undefined;

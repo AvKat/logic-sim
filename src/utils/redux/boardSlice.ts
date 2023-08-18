@@ -20,6 +20,18 @@ export const boardSlice = createSlice({
   name: "board",
   initialState,
   reducers: {
+    initBoard: (
+      state,
+      action: PayloadAction<
+        Pick<BoardState, "name" | "inputCount" | "outputCount">
+      >
+    ) => {
+      state.name = action.payload.name;
+      state.inputCount = action.payload.inputCount;
+      state.outputCount = action.payload.outputCount;
+      state.logicGates = [];
+      state.connections = [];
+    },
     addLogicGate: (state, action: PayloadAction<[TruthTable, string]>) => {
       state.logicGates.push(action.payload);
     },

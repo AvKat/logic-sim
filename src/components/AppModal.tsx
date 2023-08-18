@@ -7,6 +7,8 @@ interface AppModalProps {
   handleClose: () => void;
   children?: React.ReactNode;
   onSubmit?: () => void;
+  affirmativeText?: string;
+  negativeText?: string;
 }
 export const AppModal: React.FC<AppModalProps> = ({
   isOpen,
@@ -14,6 +16,8 @@ export const AppModal: React.FC<AppModalProps> = ({
   children,
   heading,
   onSubmit,
+  affirmativeText = "Save",
+  negativeText = "Cancel",
 }) => {
   return (
     <ReactModal
@@ -22,25 +26,15 @@ export const AppModal: React.FC<AppModalProps> = ({
       overlayClassName="Overlay"
       onRequestClose={onClose}
     >
-      <div
-        style={{
-          flex: 1,
-        }}
-      >
-        <h2>{heading}</h2>
+      <div className="flex-1">
+        <h2 className="text-2xl font-bold">{heading}</h2>
         {children}
       </div>
-      <div style={{ display: "flex" }}>
-        <button
-          onClick={onClose}
-          style={{
-            marginLeft: "auto",
-            marginRight: "20px",
-          }}
-        >
-          Cancel
+      <div className="flex">
+        <button onClick={onClose} className="ml-auto mr-5">
+          {negativeText}
         </button>
-        {onSubmit && <button onClick={onSubmit}>Save</button>}
+        {onSubmit && <button onClick={onSubmit}>{affirmativeText}</button>}
       </div>
     </ReactModal>
   );

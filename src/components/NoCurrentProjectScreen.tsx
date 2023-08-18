@@ -4,8 +4,9 @@ import { v4 } from "uuid";
 import { Project } from "../types";
 import { MainSliceActions } from "../utils/redux/mainSlice";
 import { useAppDispatch, useAppSelector } from "../utils/redux/store";
-import { useDialog } from "../utils/useModal";
+import { useModal } from "../utils/useModal";
 import { AppModal } from "./AppModal";
+import { Divider } from "./Divider";
 
 interface NoCurrentProjectScreenProps {}
 export const NoCurrentProjectScreen: React.FC<
@@ -18,7 +19,7 @@ export const NoCurrentProjectScreen: React.FC<
   };
   const dispatch = useAppDispatch();
 
-  const { dialog, setOpen } = useDialog((dialog) => (
+  const { dialog, setOpen } = useModal((dialog) => (
     <Formik
       initialValues={initialValues}
       onSubmit={(values) => {
@@ -28,12 +29,7 @@ export const NoCurrentProjectScreen: React.FC<
     >
       {({ submitForm, values, handleChange }) => (
         <AppModal {...dialog} heading="Create Project" onSubmit={submitForm}>
-          <Form
-            style={{
-              display: "flex",
-              flexDirection: "column",
-            }}
-          >
+          <Form className="flex flex-col">
             <label htmlFor="name">Name</label>
             <input
               id="name"
@@ -63,28 +59,29 @@ export const NoCurrentProjectScreen: React.FC<
   return (
     <>
       {dialog}
-      <div
-        style={{
-          height: `100vh`,
-          width: "100vw",
-          backgroundColor: "#353535",
-          display: "flex",
-          alignItems: "center",
-          flexDirection: "column",
-          padding: "50px 0px",
-        }}
-      >
-        <h1 style={{ color: "white" }}>Select project</h1>
-        <button onClick={() => setOpen(true)}>New Project</button>
-        <h3>Available Projects</h3>
-        <div
-          style={{
-            height: "40vh",
-            overflowY: "scroll",
-          }}
-        >
+      <div className="h-screen w-screen bg-[#353535] flex items-center justify-center flex-col overflow-hidden px-12">
+        <h1 className="text-white">Select project</h1>
+        <button onClick={() => setOpen(true)} className="my-7">
+          New Project
+        </button>
+        <h2>Available Projects</h2>
+        <div className="h-[40vh] overflow-y-scroll">
+          <div className="w-[30vw] bold flex text-2xl">
+            Name
+            <div className="ml-auto">Base</div>
+          </div>
+          <Divider type="horizontal" />
           {availableProjects.map((project) => (
-            <div key={v4()}>{project.name}</div>
+            <div
+              key={v4()}
+              onClick={() => {
+                dispatch(MainSliceActions.setCurrentProject(project));
+              }}
+              className="w-[30vw] flex text-2xl my-4 cursor-pointer"
+            >
+              {project.name}
+              <div className="ml-auto">{project.base}</div>
+            </div>
           ))}
         </div>
       </div>
