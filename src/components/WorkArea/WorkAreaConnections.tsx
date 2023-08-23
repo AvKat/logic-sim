@@ -1,99 +1,107 @@
-import { Form, Formik } from "formik";
+import { Form, Formik, useField } from "formik";
 import React from "react";
+import { arrayRange, capitalize } from "../../utils";
 import { BoardSliceActions } from "../../utils/redux/boardSlice";
 import { useAppDispatch, useAppSelector } from "../../utils/redux/store";
 import { UseModalArgs } from "../../utils/useModal";
 import { AppModal } from "../AppModal";
 import { WorkAreaSection } from "./WorkAreaSection";
 
+const GateSelect: React.FC<{ selectionType: "from" | "to" }> = ({
+  selectionType,
+}) => {
+  const [gateField, , gateProps] = useField(`${selectionType}GateIdx`);
+  const [pinField, , pinProps] = useField(`${selectionType}Pin`);
+
+  const {
+    logicGates: gates,
+    inputCount,
+    outputCount,
+  } = useAppSelector((state) => state.board);
+
+  const createOptionArray = (gateIdxString: string) => {
+    const gateIdx = parseInt(gateIdxString);
+    if (gateIdx === gates.length) {
+      return arrayRange(selectionType === "from" ? inputCount : outputCount);
+    }
+    const gate = gates[gateIdx][0];
+    return arrayRange(
+      selectionType === "from" ? gate.numOutputs : gate.numInputs
+    );
+  };
+
+  return (
+    <>
+      <span className="text-lg mt-3 font-semibold">
+        {capitalize(selectionType)}
+      </span>
+      <div className="flex justify-between my-2 text-lg">
+        <select
+          className="w-full bg-amber-700 text-black"
+          {...gateProps}
+          {...gateField}
+        >
+          <option value={`${gates.length}`}>
+            {selectionType === "from" ? "input" : "output"}
+          </option>
+          {gates.map((table, i) => (
+            <option key={`from-${table[0].name}-${i}`} value={`${i}`}>
+              {table[1]}
+            </option>
+          ))}
+        </select>
+        <select
+          className="w-20 text-center ml-5 rounded"
+          {...pinProps}
+          {...pinField}
+        >
+          {createOptionArray(gateField.value).map((_, i) => (
+            <option key={`from${gateField.value}-${i}`} value={`${i}`}>
+              {i}
+            </option>
+          ))}
+        </select>
+      </div>
+    </>
+  );
+};
+
 const AddConnectionModal: React.FC<UseModalArgs> = (dialog) => {
   const gates = useAppSelector((state) => state.board.logicGates);
   const dispatch = useAppDispatch();
   const initialFormValues: {
-    fromGateIdx: number;
-    fromPin: number;
-    toGateIdx: number;
-    toPin: number;
-  } = { fromGateIdx: 0, fromPin: 0, toGateIdx: 0, toPin: 0 };
+    fromGateIdx: string;
+    fromPin: string;
+    toGateIdx: string;
+    toPin: string;
+  } = { fromGateIdx: "0", fromPin: "0", toGateIdx: "0", toPin: "0" };
 
   return (
     <Formik
       initialValues={initialFormValues}
       onSubmit={({ fromGateIdx, fromPin, toGateIdx, toPin }) => {
-        const fromGate = gates[fromGateIdx][1];
-        const toGate = gates[toGateIdx][1];
+        const fromGateIdxInt = parseInt(fromGateIdx);
+        const toGateIdxInt = parseInt(toGateIdx);
+        const fromGate =
+          fromGateIdxInt === gates.length ? "input" : gates[fromGateIdxInt][1];
+        const toGate =
+          toGateIdxInt === gates.length ? "output" : gates[toGateIdxInt][1];
         dispatch(
-          BoardSliceActions.addConnection([fromGate, fromPin, toGate, toPin])
+          BoardSliceActions.addConnection([
+            fromGate,
+            parseInt(fromPin),
+            toGate,
+            parseInt(toPin),
+          ])
         );
         dialog.handleClose();
       }}
     >
-      {({ values, handleChange, submitForm }) => (
+      {({ submitForm }) => (
         <AppModal {...dialog} heading="Add Connection" onSubmit={submitForm}>
           <Form className="flex flex-col">
-            <span className="text-lg mt-3 font-semibold">From</span>
-            <div className="flex justify-between my-2 text-lg">
-              <select
-                name="fromGateIdx"
-                value={values.fromGateIdx}
-                onChange={handleChange}
-                className="w-full bg-amber-700 text-black"
-              >
-                {gates.map((table, i) => (
-                  <option key={`from-${table[0].name}-${i}`} value={`${i}`}>
-                    {table[1]}
-                  </option>
-                ))}
-              </select>
-              <select
-                name="fromPin"
-                value={values.fromPin}
-                onChange={handleChange}
-                className="w-20 text-center ml-5 rounded"
-              >
-                {[...Array(gates[values.fromGateIdx][0].numOutputs).keys()].map(
-                  (_, i) => (
-                    <option
-                      key={`from${values.fromGateIdx}-${i}`}
-                      value={`${i}`}
-                    >
-                      {i}
-                    </option>
-                  )
-                )}
-              </select>
-            </div>
-            <span className="text-lg mt-3 font-semibold">To</span>
-            <div className="flex justify-between my-2 text-lg">
-              <select
-                name="toGateIdx"
-                value={values.toGateIdx}
-                onChange={(e) => {
-                  handleChange(e);
-                }}
-                className="w-full bg-amber-700 text-black"
-              >
-                {gates.map((table, i) => (
-                  <option key={`to-${table[0].name}-${i}`} value={`${i}`}>
-                    {table[1]}
-                  </option>
-                ))}
-              </select>
-              <select
-                name="toPin"
-                value={values.toPin}
-                onChange={handleChange}
-                className="w-20 text-center ml-5 rounded"
-              >
-                {[...Array(gates[values.toGateIdx][0].numInputs).keys()].map(
-                  (i) => (
-                    <option key={`to${values.toGateIdx}-${i}`} value={`${i}`}>
-                      {i}
-                    </option>
-                  )
-                )}
-              </select>
-            </div>
+            <GateSelect selectionType="from" />
+            <GateSelect selectionType="to" />
           </Form>
         </AppModal>
       )}

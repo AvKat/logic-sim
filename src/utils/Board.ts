@@ -76,7 +76,7 @@ export class Board {
     connections = [],
   }: BoardInitType) {
     // Error if duplicate logic gate names
-    const logicGatesSorted = logicGates.sort(([_, aName], [__, bName]) =>
+    const logicGatesSorted = [...logicGates].sort(([_, aName], [__, bName]) =>
       aName.localeCompare(bName)
     );
     for (let i = 0; i < logicGatesSorted.length - 1; i++) {
@@ -91,14 +91,24 @@ export class Board {
     this.inputs = Array(inputCount).fill(0);
     this.outputs = Array(outputCount).fill(0);
 
-    // Add logic gates
+    // Add logic gates and initialize the connections object
     this.logicGates = {};
+    this.connections = {};
     logicGates.forEach(([table, name]) => {
       this.logicGates[name] = new CompiledLogicGate(table, name);
+      this.connections[name] = [];
+      for (let i = 0; i < table.numInputs; i++) {
+        this.connections[name].push([]);
+      }
     });
 
-    // Add connections
-    this.connections = {};
+    // Add synthetic input entry in connections
+    this.connections["input"] = [];
+    for (let i = 0; i < inputCount; i++) {
+      this.connections["input"].push([]);
+    }
+
+    // Add given connections
     connections.forEach(([fromID, fromPin, toID, toPin]) => {
       this.addConnection([fromID, fromPin], [toID, toPin]);
     });
@@ -109,10 +119,6 @@ export class Board {
   addConnection(from: BoardPinNumberTuple, to: BoardPinNumberTuple) {
     let [fromGateId, fromPin] = from;
     let [toGateId, toPin] = to;
-
-    if (!this.connections[fromGateId]) this.connections[fromGateId] = [];
-    if (!this.connections[fromGateId][fromPin])
-      this.connections[fromGateId][fromPin] = [];
 
     this.connections[fromGateId][fromPin].push([toGateId, toPin]);
 
