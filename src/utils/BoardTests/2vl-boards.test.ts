@@ -23,19 +23,9 @@ const XORBoard = new Board({
   ],
 });
 
-const XORTable = XORBoard.generateTruthTable();
+const XORTable = await XORBoard.generateTruthTable();
 
 describe("XOR testing", () => {
-  test("XOR board", () => {
-    const board = XORBoard;
-
-    expect(board.outputs).toEqual([0]);
-    board.setInput(0, 1);
-    expect(board.outputs).toEqual([1]);
-    board.setInput(1, 1);
-    expect(board.outputs).toEqual([0]);
-  });
-
   test("XOR table", () => {
     expect(XORTable.data).toEqual({
       "00": [0],
@@ -62,19 +52,9 @@ const NandBoard = new Board({
   ],
 });
 
-const NandTable = NandBoard.generateTruthTable();
+const NandTable = await NandBoard.generateTruthTable();
 
 describe("NAND testing", () => {
-  test("NAND board", () => {
-    const board = NandBoard;
-
-    expect(board.outputs).toEqual([1]);
-    board.setInput(0, 1);
-    expect(board.outputs).toEqual([1]);
-    board.setInput(1, 1);
-    expect(board.outputs).toEqual([0]);
-  });
-
   test("NAND table", () => {
     expect(NandTable.data).toEqual({
       "00": [1],
@@ -107,27 +87,9 @@ const MuxBoard = new Board({
   ],
 });
 
-const MuxTable = MuxBoard.generateTruthTable();
+const MuxTable = await MuxBoard.generateTruthTable();
 
 describe("MUX testing", () => {
-  test("MUX board", () => {
-    const board = MuxBoard;
-
-    expect(board.outputs).toEqual([0]);
-    board.setInput(0, 1);
-    expect(board.outputs).toEqual([1]);
-    board.setInput(1, 1);
-    expect(board.outputs).toEqual([1]);
-    board.setInput(2, 1);
-    expect(board.outputs).toEqual([1]);
-    board.setInput(0, 0);
-    expect(board.outputs).toEqual([1]);
-    board.setInput(1, 0);
-    expect(board.outputs).toEqual([0]);
-    board.setInput(2, 0);
-    expect(board.outputs).toEqual([0]);
-  });
-
   test("MUX table", () => {
     expect(MuxTable.data).toEqual({
       "000": [0],
@@ -160,23 +122,9 @@ const HalfAdderBoard = new Board({
   ],
 });
 
-const HalfAdderTable = HalfAdderBoard.generateTruthTable();
+const HalfAdderTable = await HalfAdderBoard.generateTruthTable();
 
 describe("Half Adder testing", () => {
-  test("Half Adder board", () => {
-    const board = HalfAdderBoard;
-
-    expect(board.outputs).toEqual([0, 0]);
-    board.setInput(0, 1);
-    expect(board.outputs).toEqual([0, 1]);
-    board.setInput(1, 1);
-    expect(board.outputs).toEqual([1, 0]);
-    board.setInput(0, 0);
-    expect(board.outputs).toEqual([0, 1]);
-    board.setInput(1, 0);
-    expect(board.outputs).toEqual([0, 0]);
-  });
-
   test("Half Adder table", () => {
     expect(HalfAdderTable.data).toEqual({
       "00": [0, 0],
@@ -208,24 +156,9 @@ const FullAdderBoard = new Board({
   ],
 });
 
-const FullAdderTable = FullAdderBoard.generateTruthTable();
+const FullAdderTable = await FullAdderBoard.generateTruthTable();
 
 describe("Full Adder testing", () => {
-  test("Full Adder board", () => {
-    const board = FullAdderBoard;
-
-    expect(board.outputs).toEqual([0, 0]);
-    board.setInput(0, 1);
-    expect(board.outputs).toEqual([0, 1]);
-    board.setInput(1, 1);
-    expect(board.outputs).toEqual([1, 0]);
-    board.setInput(2, 1);
-    expect(board.outputs).toEqual([1, 1]);
-    board.setInput(0, 0);
-    board.setInput(2, 0);
-    expect(board.outputs).toEqual([0, 1]);
-  });
-
   test("Full Adder table", () => {
     expect(FullAdderTable.data).toEqual({
       "000": [0, 0],

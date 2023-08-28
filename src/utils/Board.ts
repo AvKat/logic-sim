@@ -135,7 +135,8 @@ export class Board {
 
   setInput(index: number, value: Pin) {
     this.inputs[index] = value;
-    return this.updateOutputs(this.createFrontierForSingleInput(index));
+    this.outputs = this.updateOutputs(this.createFrontierForSingleInput(index));
+    return this.outputs;
   }
 
   createFrontierForSingleInput(starterIndex: number): FrontierType {
@@ -167,6 +168,7 @@ export class Board {
 
   updateOutputs(frontier: FrontierType, force = false): Pin[] {
     let i = 0;
+    const outputs: Pin[] = [...this.outputs];
     while (frontier.length > 0) {
       if (i++ == 1000) {
         console.error("stopping because of maximum recursion");
@@ -174,7 +176,7 @@ export class Board {
       }
       const [gateId, pinNumber, value] = frontier.popFirst()!;
       if (gateId === "output") {
-        this.outputs[pinNumber] = value;
+        outputs[pinNumber] = value;
         continue;
       }
       const gate = this.logicGates[gateId];
@@ -189,7 +191,7 @@ export class Board {
         }
       }
     }
-    return this.outputs;
+    return outputs;
   }
 
   generateTruthTable(): TruthTable {
@@ -201,11 +203,13 @@ export class Board {
       const key = i.toString(this.base).padStart(this.inputs.length, "0");
       const inputs = key.split("").map((x) => parseInt(x) as Pin);
       this.inputs = inputs;
-      const outputs = this.updateOutputs(this.createDefaultFrontier());
+      // Make this better by not recalculating the outputs for each input
+      // and using the previous state as a starting point
+      const outputs = this.updateOutputs(this.createDefaultFrontier(), true);
       truthTableData[key] = [...outputs];
     }
     this.inputs = oldInputs;
-    this.updateOutputs(this.createDefaultFrontier());
+    this.outputs = this.updateOutputs(this.createDefaultFrontier());
     return createTruthTable(truthTableData, this.name);
   }
 }

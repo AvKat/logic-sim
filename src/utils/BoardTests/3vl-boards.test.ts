@@ -6,7 +6,7 @@ import {
 } from "../BoardBuiltins/3vl-kleene-builtins";
 
 describe("KleeneNAND testing", () => {
-  test("KleeneNAND table", () => {
+  test("KleeneNAND table", async () => {
     const board = new Board({
       name: "KleeneNAND",
       base: 3,
@@ -23,7 +23,8 @@ describe("KleeneNAND testing", () => {
         ["n1", 0, "output", 0],
       ],
     });
-    expect(board.generateTruthTable().data).toEqual({
+    const table = await board.generateTruthTable();
+    expect(table.data).toEqual({
       "00": [2],
       "01": [2],
       "02": [2],
@@ -55,8 +56,9 @@ const KleeneImplicationBoard = new Board({
 });
 
 describe("KleeneImplication testing", () => {
-  test("KleeneImplication table", () => {
-    expect(KleeneImplicationBoard.generateTruthTable().data).toEqual({
+  test("KleeneImplication table", async () => {
+    const table = await KleeneImplicationBoard.generateTruthTable();
+    expect(table.data).toEqual({
       "00": [2],
       "01": [2],
       "02": [2],
@@ -70,10 +72,10 @@ describe("KleeneImplication testing", () => {
   });
 });
 
-const KleeneImplication = KleeneImplicationBoard.generateTruthTable();
+const KleeneImplication = await KleeneImplicationBoard.generateTruthTable();
 
 describe("KleeneEquivalence testing", () => {
-  test("KleeneEquivalence table", () => {
+  test("KleeneEquivalence table", async () => {
     const board = new Board({
       name: "KleeneEquivalence",
       base: 3,
@@ -95,7 +97,8 @@ describe("KleeneEquivalence testing", () => {
       ],
     });
 
-    expect(board.generateTruthTable().data).toEqual({
+    const table = await board.generateTruthTable();
+    expect(table.data).toEqual({
       "00": [2],
       "01": [1],
       "02": [0],
