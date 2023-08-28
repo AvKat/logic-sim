@@ -5,14 +5,14 @@ import { PreviewArea } from "./components/PreviewArea";
 import { WorkArea } from "./components/WorkArea";
 import { MenuBarHeight } from "./utils/constants";
 import ReactModal from "react-modal";
-import { useAppSelector } from "./utils/redux/store";
 import { NoCurrentProjectScreen } from "./components/NoCurrentProjectScreen";
+import { useCurrentProject } from "./utils/reduxWrapperHooks";
 
 ReactModal.setAppElement("#root");
 
 const App = () => {
-  const project = useAppSelector((state) => state.project);
-  if (!project.currentProject) {
+  const currentProject = useCurrentProject();
+  if (currentProject === undefined) {
     return <NoCurrentProjectScreen />;
   }
 

@@ -2,14 +2,13 @@ import { Form, Formik } from "formik";
 import React from "react";
 import { BoardSliceActions } from "../../utils/redux/boardSlice";
 import { useAppDispatch, useAppSelector } from "../../utils/redux/store";
+import { useCurrentProject } from "../../utils/reduxWrapperHooks";
 import { UseModalArgs } from "../../utils/useModal";
 import { AppModal } from "../AppModal";
 import { WorkAreaSection } from "./WorkAreaSection";
 
 const AddGateModal: React.FC<UseModalArgs> = (dialog) => {
-  const availableGates = useAppSelector(
-    (state) => state.project.currentProject!.availableGates
-  );
+  const availableGates = useCurrentProject()!.availableGates;
   const dispatch = useAppDispatch();
   const initialFormValues: { name: string; tableIdx: string } = {
     name: "",

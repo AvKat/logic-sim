@@ -3,6 +3,7 @@ import { BoardInitType, TruthTable } from "../Board";
 
 type BoardState = {
   name: string;
+  base?: number;
   inputCount: Required<BoardInitType>["inputCount"];
   outputCount: Required<BoardInitType>["outputCount"];
   logicGates: Required<BoardInitType>["logicGates"];
@@ -23,14 +24,18 @@ export const boardSlice = createSlice({
     initBoard: (
       state,
       action: PayloadAction<
-        Pick<BoardState, "name" | "inputCount" | "outputCount">
+        Pick<BoardState, "name" | "inputCount" | "outputCount" | "base">
       >
     ) => {
-      state.name = action.payload.name;
-      state.inputCount = action.payload.inputCount;
-      state.outputCount = action.payload.outputCount;
-      state.logicGates = [];
-      state.connections = [];
+      return {
+        ...state,
+        name: action.payload.name,
+        base: action.payload.base,
+        inputCount: action.payload.inputCount,
+        outputCount: action.payload.outputCount,
+        logicGates: [],
+        connections: [],
+      };
     },
     addLogicGate: (state, action: PayloadAction<[TruthTable, string]>) => {
       return { ...state, logicGates: [...state.logicGates, action.payload] };

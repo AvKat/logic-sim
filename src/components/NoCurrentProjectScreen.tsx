@@ -71,11 +71,11 @@ export const NoCurrentProjectScreen: React.FC<
             <div className="ml-auto">Base</div>
           </div>
           <Divider type="horizontal" />
-          {availableProjects.map((project) => (
+          {availableProjects.map((project, i) => (
             <div
               key={v4()}
               onClick={() => {
-                dispatch(MainSliceActions.setCurrentProject(project));
+                dispatch(MainSliceActions.setCurrentProject(i));
               }}
               className="w-[30vw] flex text-2xl my-4 cursor-pointer"
             >

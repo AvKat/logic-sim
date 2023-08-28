@@ -116,7 +116,7 @@ export class Board {
     this.updateOutputs(this.createDefaultFrontier(), true);
   }
 
-  addConnection(from: BoardPinNumberTuple, to: BoardPinNumberTuple) {
+  private addConnection(from: BoardPinNumberTuple, to: BoardPinNumberTuple) {
     let [fromGateId, fromPin] = from;
     let [toGateId, toPin] = to;
 
@@ -133,13 +133,15 @@ export class Board {
     }
   }
 
-  setInput(index: number, value: Pin) {
+  private async setInput(index: number, value: Pin) {
     this.inputs[index] = value;
-    this.outputs = this.updateOutputs(this.createFrontierForSingleInput(index));
+    this.outputs = await this.updateOutputs(
+      this.createFrontierForSingleInput(index)
+    );
     return this.outputs;
   }
 
-  createFrontierForSingleInput(starterIndex: number): FrontierType {
+  private createFrontierForSingleInput(starterIndex: number): FrontierType {
     // input pins only have 1 output pin
     const firstLayerOfConnections = this.connections["input"][starterIndex];
     const nextValue = this.inputs[starterIndex];
@@ -152,7 +154,7 @@ export class Board {
     return new DoublyLinkedList(formatted);
   }
 
-  createDefaultFrontier(): FrontierType {
+  private createDefaultFrontier(): FrontierType {
     const frontierArr: FrontierItem[] = [];
     for (let i = 0; i < this.inputs.length; i++) {
       if (!this.connections["input"]) continue;
@@ -166,7 +168,10 @@ export class Board {
     return new DoublyLinkedList(frontierArr);
   }
 
-  updateOutputs(frontier: FrontierType, force = false): Pin[] {
+  private async updateOutputs(
+    frontier: FrontierType,
+    force = false
+  ): Promise<Pin[]> {
     let i = 0;
     const outputs: Pin[] = [...this.outputs];
     while (frontier.length > 0) {
@@ -194,8 +199,9 @@ export class Board {
     return outputs;
   }
 
-  generateTruthTable(): TruthTable {
+  async generateTruthTable(): Promise<TruthTable> {
     const oldInputs = this.inputs;
+    const oldOutputs = this.outputs;
 
     this.inputs = Array(this.inputCount).fill(0);
     const truthTableData: TruthTableDataType = {};
@@ -205,11 +211,14 @@ export class Board {
       this.inputs = inputs;
       // Make this better by not recalculating the outputs for each input
       // and using the previous state as a starting point
-      const outputs = this.updateOutputs(this.createDefaultFrontier(), true);
+      const outputs = await this.updateOutputs(
+        this.createDefaultFrontier(),
+        true
+      );
       truthTableData[key] = [...outputs];
     }
     this.inputs = oldInputs;
-    this.outputs = this.updateOutputs(this.createDefaultFrontier());
+    this.outputs = oldOutputs;
     return createTruthTable(truthTableData, this.name);
   }
 }

@@ -1,18 +1,25 @@
 import { Formik, Form } from "formik";
 import React from "react";
 import { combineClassNames } from "../utils";
-import { Board } from "../utils/Board";
 import { MenuBarHeight } from "../utils/constants";
 import { BoardSliceActions } from "../utils/redux/boardSlice";
 import { MainSliceActions } from "../utils/redux/mainSlice";
 import { useAppDispatch, useAppSelector } from "../utils/redux/store";
-import { useGetCompiled } from "../utils/useGetCompiled";
+import {
+  useCloseProject,
+  useCurrentProject,
+  useGetCompiled,
+} from "../utils/reduxWrapperHooks";
 import { useModal, UseModalArgs } from "../utils/useModal";
 import { AppModal } from "./AppModal";
 import { Divider } from "./Divider";
 
 const NewBoardDialog = (dialog: UseModalArgs) => {
   const dispatch = useAppDispatch();
+  const project = useCurrentProject();
+  const base = project ? project.base : 2;
+  const availableGates = project ? project.availableGates : [];
+  const isGateOpen = useAppSelector((state) => state.project.boardOpen);
 
   return (
     <Formik
@@ -22,24 +29,33 @@ const NewBoardDialog = (dialog: UseModalArgs) => {
           alert("Please enter a name");
           return;
         }
+        for (let i = 0; i < availableGates.length; i++) {
+          if (availableGates[i].name === name) {
+            alert(`A gate with the name ${name} already exists`);
+            return;
+          }
+        }
+
         if (inputCount < 1 || outputCount < 1) {
           alert("Please enter a valid number of inputs/outputs");
           return;
         }
         dispatch(MainSliceActions.setBoardOpen(true));
         dispatch(
-          BoardSliceActions.initBoard({ inputCount, outputCount, name })
+          BoardSliceActions.initBoard({ inputCount, outputCount, name, base })
         );
         dialog.handleClose();
       }}
     >
       {({ values, handleChange, submitForm }) => (
         <AppModal {...dialog} heading="New gate" onSubmit={submitForm}>
-          <div className="mt-2">
-            <span>All unsaved changes will be lost.</span>
-            <br />
-            <span>Proceed with caution.</span>
-          </div>
+          {isGateOpen && (
+            <div className="mt-2 text-red-600 text-lg font-bold">
+              <span>All unsaved changes will be lost.</span>
+              <br />
+              <span>Proceed with caution.</span>
+            </div>
+          )}
           <Divider type="horizontal" />
           <Form className="flex flex-col">
             <label className="mt-2">Name</label>
@@ -81,6 +97,25 @@ export const MenuBar: React.FC<MenuBarProps> = () => {
     (dialog) => <NewBoardDialog {...dialog} />
   );
   const getCompiled = useGetCompiled();
+  const dispatch = useAppDispatch();
+  const availableGates = useCurrentProject()!.availableGates;
+  const closeProject = useCloseProject();
+
+  const saveBoardAsGate = async () => {
+    if (!getCompiled) return;
+    const gate = await getCompiled();
+    const sameName = availableGates.find((gate) => gate.name === gate.name);
+
+    let message = sameName
+      ? `A gate with the name ${sameName.name} already exists.\nDo you want to overwrite it?`
+      : "Are you sure you want to save the board?";
+
+    const shouldSave = confirm(message);
+    if (!shouldSave) return;
+
+    dispatch(MainSliceActions.addGate(gate));
+    alert("Gate added to project");
+  };
 
   return (
     <>
@@ -101,17 +136,66 @@ export const MenuBar: React.FC<MenuBarProps> = () => {
         >
           New project
         </div>
-
         <div
           className={combineClassNames(
             MENU_BAR_BUTTON_CLASSES,
-            "bg-yellow-400"
+            "bg-pink-400",
+            getCompiled ? "cursor-pointer" : "cursor-not-allowed"
+          )}
+          onClick={saveBoardAsGate}
+        >
+          Save board as gate
+        </div>
+        <div
+          className={combineClassNames(
+            MENU_BAR_BUTTON_CLASSES,
+            "bg-yellow-400",
+            getCompiled ? "cursor-pointer" : "cursor-not-allowed"
           )}
           onClick={() => {
-            console.log(getCompiled().data);
+            getCompiled && getCompiled().then((gate) => console.log(gate));
           }}
         >
           Print compiled table
+        </div>
+
+        <div
+          className={combineClassNames(MENU_BAR_BUTTON_CLASSES, "bg-gray-400")}
+          onClick={() => {
+            console.log(availableGates);
+          }}
+        >
+          Print availableGates
+        </div>
+        <div
+          className={combineClassNames(MENU_BAR_BUTTON_CLASSES, "bg-green-400")}
+          onClick={() => {
+            const shouldClose = confirm(
+              "Are you sure you want to close the project?\nAny unsaved changes will be lost."
+            );
+            if (shouldClose) {
+              closeProject();
+            }
+          }}
+        >
+          Close project
+        </div>
+        <div
+          className={combineClassNames(
+            MENU_BAR_BUTTON_CLASSES,
+            "bg-black text-white"
+          )}
+          onClick={() => {
+            const shouldClose = confirm(
+              "Are you sure you want to close the board?\nAny unsaved changes will be lost."
+            );
+            if (shouldClose) {
+              dispatch(MainSliceActions.setBoardOpen(false));
+              dispatch(BoardSliceActions.clearData());
+            }
+          }}
+        >
+          Close board
         </div>
       </div>
     </>

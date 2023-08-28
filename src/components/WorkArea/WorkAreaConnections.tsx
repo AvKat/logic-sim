@@ -10,8 +10,8 @@ import { WorkAreaSection } from "./WorkAreaSection";
 const GateSelect: React.FC<{ selectionType: "from" | "to" }> = ({
   selectionType,
 }) => {
-  const [gateField, , gateProps] = useField(`${selectionType}GateIdx`);
-  const [pinField, , pinProps] = useField(`${selectionType}Pin`);
+  const [gateField] = useField(`${selectionType}GateIdx`);
+  const [pinField] = useField(`${selectionType}Pin`);
 
   const {
     logicGates: gates,
@@ -36,11 +36,7 @@ const GateSelect: React.FC<{ selectionType: "from" | "to" }> = ({
         {capitalize(selectionType)}
       </span>
       <div className="flex justify-between my-2 text-lg">
-        <select
-          className="w-full bg-amber-700 text-black"
-          {...gateProps}
-          {...gateField}
-        >
+        <select className="w-full bg-amber-700 text-black" {...gateField}>
           <option value={`${gates.length}`}>
             {selectionType === "from" ? "input" : "output"}
           </option>
@@ -50,11 +46,7 @@ const GateSelect: React.FC<{ selectionType: "from" | "to" }> = ({
             </option>
           ))}
         </select>
-        <select
-          className="w-20 text-center ml-5 rounded"
-          {...pinProps}
-          {...pinField}
-        >
+        <select className="w-20 text-center ml-5 rounded" {...pinField}>
           {createOptionArray(gateField.value).map((_, i) => (
             <option key={`from${gateField.value}-${i}`} value={`${i}`}>
               {i}
